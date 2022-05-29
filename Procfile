@@ -1,1 +1,1 @@
-web: bin/com-line-bot
+web: com-line-bot
