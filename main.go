@@ -40,12 +40,13 @@ func main() {
 				switch message := event.Message.(type) {
 				case *linebot.TextMessage:
 					content := message.Text
-					if content == "!뭐먹지" {
+					switch content {
+					case "!뭐먹지":
 						resp, err := http.Get("https://raw.githubusercontent.com/BeLeap/com-line-bot/main/resources/foodlist.json")
 						if err != nil {
 							log.Print(err)
 							bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("리스트를 불러오지 못했어요.")).Do()
-							return
+							break
 						}
 						defer resp.Body.Close()
 
@@ -56,7 +57,7 @@ func main() {
 						if err := json.Unmarshal(respByte, &foodListJson); err != nil {
 							log.Print(err)
 							bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("리스트를 해석하지 못했어요.")).Do()
-							return
+							break
 						}
 
 						foodList := foodListJson.Foods
@@ -65,6 +66,7 @@ func main() {
 						if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(foodList[rand.Intn(len(foodList))])).Do(); err != nil {
 							log.Print(err)
 						}
+						break
 					}
 				}
 			}
