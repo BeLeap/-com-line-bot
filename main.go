@@ -42,6 +42,7 @@ func main() {
 					content := message.Text
 					switch content {
 					case "!뭐먹지":
+					case "ㅁㅁㅈ":
 						resp, err := http.Get("https://raw.githubusercontent.com/BeLeap/com-line-bot/main/resources/foodlist.json")
 						if err != nil {
 							log.Print(err)
