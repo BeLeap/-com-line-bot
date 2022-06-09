@@ -59,7 +59,10 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 					b.replyTextMessage(utils.Select(slice))
 					break
 				} else if strings.HasPrefix(content, "!선택") {
-					b.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("TODO"))
+					trimmedContent := strings.TrimPrefix(content, "!선택")
+					trimmedContent = strings.Trim(trimmedContent, " ")
+					splittedContent := strings.Split(trimmedContent, " ")
+					b.replyTextMessage(utils.Select(splittedContent))
 					break
 				}
 
