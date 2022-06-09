@@ -45,6 +45,7 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	for _, event := range events {
 		b.event = event
 		rand.Seed(time.Now().UnixNano())
@@ -55,14 +56,18 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 				content := message.Text
 
 				if strings.Contains(content, " vs ") && strings.HasPrefix(content, "!") {
-					slice := strings.Split(content[1:], " vs ")
-					b.replyTextMessage(utils.Select(slice))
+					b.replyTextMessage(
+						utils.Select(
+							utils.SplitRealContent(content, "!", " vs "),
+						),
+					)
 					break
 				} else if strings.HasPrefix(content, "!선택") {
-					trimmedContent := strings.TrimPrefix(content, "!선택")
-					trimmedContent = strings.Trim(trimmedContent, " ")
-					splittedContent := strings.Split(trimmedContent, " ")
-					b.replyTextMessage(utils.Select(splittedContent))
+					b.replyTextMessage(
+						utils.Select(
+							utils.SplitRealContent(content, "!선택", " "),
+						),
+					)
 					break
 				}
 
