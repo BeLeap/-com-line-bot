@@ -43,6 +43,8 @@ func main() {
 				case *linebot.TextMessage:
 					content := message.Text
 					
+					rand.Seed(time.Now().UnixNano())
+
 					if strings.Contains(content, " vs ") && strings.HasPrefix(content, "!") {
 						slice := strings.Split(content[1:], " vs ")
 						bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(slice[utils.Random(0, len(slice))])).Do()
@@ -72,8 +74,7 @@ func main() {
 
 						foodList := foodListJson.Foods
 
-						rand.Seed(time.Now().UnixNano())
-						if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(foodList[rand.Intn(len(foodList))])).Do(); err != nil {
+						if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(foodList[utils.Random(0, len(foodList))])).Do(); err != nil {
 							log.Print(err)
 						}
 						break
