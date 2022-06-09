@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"com-line-bot/commands"
 	"com-line-bot/utils"
 	"encoding/json"
 	"log"
@@ -16,7 +15,8 @@ import (
 )
 
 type Bot struct {
-	bot *linebot.Client
+	bot   *linebot.Client
+	event *linebot.Event
 }
 
 type FoodList struct {
@@ -46,19 +46,21 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for _, event := range events {
+		b.event = event
+		rand.Seed(time.Now().UnixNano())
+
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				content := message.Text
 
-				rand.Seed(time.Now().UnixNano())
-
 				if strings.Contains(content, " vs ") && strings.HasPrefix(content, "!") {
 					slice := strings.Split(content[1:], " vs ")
-					b.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(commands.Select(slice))).Do()
+					b.replyTextMessage(utils.Select(slice))
 					break
 				} else if strings.HasPrefix(content, "!선택") {
 					b.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("TODO"))
+					break
 				}
 
 				switch content {
@@ -67,7 +69,7 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 					resp, err := http.Get("https://raw.githubusercontent.com/BeLeap/com-line-bot/main/resources/foodlist.json")
 					if err != nil {
 						log.Print(err)
-						b.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("리스트를 불러오지 못했어요.")).Do()
+						b.replyTextMessage("리스트를 불러오지 못했어요.")
 						break
 					}
 					defer resp.Body.Close()
@@ -78,13 +80,13 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 					respByte := buf.Bytes()
 					if err := json.Unmarshal(respByte, &foodListJson); err != nil {
 						log.Print(err)
-						b.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("리스트를 해석하지 못했어요.")).Do()
+						b.replyTextMessage("리스트를 해석하지 못했어요.")
 						break
 					}
 
 					foodList := foodListJson.Foods
 
-					if _, err := b.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(foodList[utils.Random(0, len(foodList))])).Do(); err != nil {
+					if _, err := b.replyTextMessage(utils.Select(foodList)); err != nil {
 						log.Print(err)
 					}
 					break
@@ -92,4 +94,8 @@ func (b *Bot) Callback(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+func (b *Bot) replyTextMessage(message string) (*linebot.BasicResponse, error) {
+	return b.bot.ReplyMessage(b.event.ReplyToken, linebot.NewTextMessage(message)).Do()
 }
