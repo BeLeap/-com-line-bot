@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"com-line-bot/utils"
 	"encoding/json"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -40,6 +42,13 @@ func main() {
 				switch message := event.Message.(type) {
 				case *linebot.TextMessage:
 					content := message.Text
+					
+					if strings.Contains(content, " vs ") && strings.HasPrefix(content, "!") {
+						slice := strings.Split(content[1:], " vs ")
+						bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(slice[utils.Random(0, len(slice))])).Do()
+						break
+					}
+
 					switch content {
 					case "!뭐먹지":
 					case "ㅁㅁㅈ":
